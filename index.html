@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RollerLTC - Gamified Litecoin Mining</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0d1117;
+      color: #ffffff;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header Logo */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    .header-icon {
+      font-size: 22px;
+    }
+    .header-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .header-title span {
+      color: #3b82f6;
+    }
+
+    /* Top Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      background-color: #121824;
+      border-radius: 8px;
+      padding: 4px;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .tab.active {
+      background-color: #1e293b;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .tab-icon {
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    /* Main Card */
+    .main-card {
+      background: linear-gradient(180deg, #131b2e 0%, #0f172a 100%);
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .lightning-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      color: #f59e0b;
+      filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.4));
+    }
+    .main-card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      color: #f8fafc;
+    }
+    .main-card p {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.4;
+      max-width: 280px;
+      margin-bottom: 20px;
+    }
+
+    /* Balance Container */
+    .balance-box {
+      width: 100%;
+      background-color: #0b1120;
+      border: 1px solid #1d4ed8;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .balance-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+    .balance-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #3b82f6;
+      font-family: monospace;
+    }
+
+    /* Action Button */
+    .btn-boost {
+      width: 100%;
+      background-color: #f97316;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+      transition: background-color 0.2s;
+    }
+    .btn-boost:active {
+      background-color: #ea580c;
+    }
+
+    /* Stats Card */
+    .stats-card {
+      background-color: #121824;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .stats-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+    .stats-label {
+      color: #94a3b8;
+    }
+    .stats-value {
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .stats-value.green { color: #22c55e; }
+    .stats-value.blue { color: #3b82f6; }
+
+    /* Info Card Preview */
+    .info-card {
+      background-color: #121824;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    /* Modals Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: #121824;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* Minigame Hub Styles */
+    .game-option {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .game-info {
+      text-align: left;
+    }
+    .game-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .game-reward {
+      font-size: 11px;
+      color: #22c55e;
+      margin-top: 2px;
+    }
+    .btn-play {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Interactive Game Area */
+    .click-game-box {
+      background: #0b1120;
+      border: 2px dashed #f59e0b;
+      border-radius: 12px;
+      padding: 30px 20px;
+      margin: 15px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .click-game-box:active {
+      transform: scale(0.98);
+    }
+
+    /* Wallet Section Styling */
+    .wallet-toggle {
+      display: flex;
+      background: #0b1120;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 16px;
+      gap: 4px;
+    }
+    .wallet-toggle-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .wallet-toggle-btn.active {
+      background: #1d4ed8;
+      color: #fff;
+    }
+    .wallet-section {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .wallet-section.active { display: flex; }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .input-field {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    .qr-container {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 8px;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-container img { width: 100%; height: 100%; }
+    .address-display {
+      background: #0b1120;
+      border: 1px dashed #3b82f6;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #3b82f6;
+      word-break: break-all;
+      text-align: center;
+    }
+    .btn-action {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header">
+      <span class="header-icon">⛏️</span>
+      <h1 class="header-title">Roller <span>LTC</span></h1>
+    </div>
+
+    <!-- Top Nav Tabs -->
+    <div class="nav-tabs">
+      <div class="tab active" id="tabDashboard">
+        <span class="tab-icon">📊</span>
+        Dashboard
+      </div>
+      <div class="tab" id="tabMinigames">
+        <span class="tab-icon">🎮</span>
+        Mini-Games<br>(Boost)
+      </div>
+      <div class="tab" id="tabWallet">
+        <span class="tab-icon">👛</span>
+        Wallet &<br>Cashout
+      </div>
+    </div>
+
+    <!-- Active Mining Card -->
+    <div class="main-card">
+      <div class="lightning-icon">⚡</div>
+      <h2>Litecoin Cloud Mining Rig<br>Active</h2>
+      <p>Your hardware automatically mines LTC every second based on your Hashrate.</p>
+      
+      <div class="balance-box">
+        <div class="balance-label">AUTOMATIC MINER BALANCE</div>
+        <div class="balance-value" id="ltcBalance">0.00000000 LTC</div>
+      </div>
+
+      <button class="btn-boost" id="boostBtn">
+        <span>🎮</span> Play Games to Boost Power
+      </button>
+    </div>
+
+    <!-- Mining Stats -->
+    <div class="stats-card">
+      <div class="stats-header">
+        <span style="color: #f59e0b;">⚡</span> Mining Stats
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Base Power:</span>
+        <span class="stats-value">100 GH/s</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Game Boost Power:</span>
+        <span class="stats-value green" id="boostPower">+0 GH/s</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Total Hashrate:</span>
+        <span class="stats-value blue" id="totalHashrate">100 GH/s</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Est. Daily Earning:</span>
+        <span class="stats-value blue" id="dailyEarning">0.00086400 LTC</span>
+      </div>
+    </div>
+
+    <!-- Info Section Header -->
+    <div class="info-card">
+      <span style="color: #3b82f6;">ℹ️</span> RollerLTC Info
+    </div>
+  </div>
+
+  <!-- MINIGAMES SELECTION MODAL -->
+  <div class="modal-overlay" id="gamesModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🎮 Mini-Games Hub</div>
+        <button class="close-btn" id="closeGames">&times;</button>
+      </div>
+      
+      <div class="game-option">
+        <div class="game-info">
+          <div class="game-name">⚡ Fast Tap Booster</div>
+          <div class="game-reward">Reward: +50 GH/s Power</div>
+        </div>
+        <button class="btn-play" id="startTapGame">PLAY</button>
+      </div>
+
+      <div class="game-option">
+        <div class="game-info">
+          <div class="game-name">⛏️ Coin Miner Challenge</div>
+          <div class="game-reward">Reward: +100 GH/s Power</div>
+        </div>
+        <button class="btn-play" id="startCoinGame">PLAY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYABLE TAP GAME MODAL -->
+  <div class="modal-overlay" id="playModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="activeGameTitle">Play Minigame</div>
+        <button class="close-btn" id="closePlay">&times;</button>
+      </div>
+      <p style="font-size: 12px; color: #94a3b8;">Tap the target 10 times to claim your Hashrate Power Boost!</p>
+      
+      <div class="click-game-box" id="gameTarget">
+        <div style="font-size: 40px;" id="gameEmoji">⚡</div>
+        <div style="margin-top: 8px; font-weight: 700; color: #f59e0b;" id="tapCounter">Taps Left: 10</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WALLET & CASHOUT MODAL -->
+  <div class="modal-overlay" id="walletModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">👛 Wallet & Cashout</div>
+        <button class="close-btn" id="closeWallet">&times;</button>
+      </div>
+
+      <div class="wallet-toggle">
+        <button class="wallet-toggle-btn active" id="toggleDeposit">Deposit</button>
+        <button class="wallet-toggle-btn" id="toggleWithdraw">Withdraw</button>
+      </div>
+
+      <!-- Deposit Section -->
+      <div class="wallet-section active" id="depositSection">
+        <div class="qr-container">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=LTC:LTC_DEPOSIT_ADDRESS_ROLLER_HUB_2026" alt="LTC QR">
+        </div>
+        <div class="input-group">
+          <label>Deposit Network:</label>
+          <input type="text" class="input-field" value="Litecoin (LTC Mainnet)" readonly>
+        </div>
+        <div class="input-group">
+          <label>Your Personal Deposit Address:</label>
+          <div class="address-display" id="ltcAddress">LTC1Q8X9P0Z6Y3M2W1K5J8H7G6F5D4C3B2A1</div>
+        </div>
+        <button class="btn-action" style="background:#3b82f6;" id="copyAddressBtn">Copy LTC Address</button>
+      </div>
+
+      <!-- Withdraw Section -->
+      <div class="wallet-section" id="withdrawSection">
+        <div class="input-group">
+          <label>Available Balance:</label>
+          <div class="input-field" id="withdrawAvailable">0.00000000 LTC</div>
+        </div>
+        <div class="input-group">
+          <label>Destination LTC Address:</label>
+          <input type="text" class="input-field" id="withdrawAddrInput" placeholder="Enter LTC Wallet Address">
+        </div>
+        <div class="input-group">
+          <label>Amount to Withdraw (Min: 0.001 LTC):</label>
+          <input type="number" step="0.00000001" class="input-field" id="withdrawAmountInput" placeholder="0.00000000">
+        </div>
+        <button class="btn-action" id="processWithdrawBtn">Request Withdrawal</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Game State
+    let balance = 0.00000000;
+    let basePower = 100;
+    let gameBoostPower = 0;
+
+    function getEarningPerSecond() {
+      let totalPower = basePower + gameBoostPower;
+      return (totalPower / 100) * 0.00000001;
+    }
+
+    function updateStatsUI() {
+      document.getElementById('boostPower').textContent = `+${gameBoostPower} GH/s`;
+      let total = basePower + gameBoostPower;
+      document.getElementById('totalHashrate').textContent = `${total} GH/s`;
+      let estDaily = (total / 100) * 0.00086400;
+      document.getElementById('dailyEarning').textContent = `${estDaily.toFixed(8)} LTC`;
+    }
+
+    const balanceEl = document.getElementById('ltcBalance');
+    let lastTime = performance.now();
+
+    function updateLoop(currentTime) {
+      let deltaTime = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+
+      balance += getEarningPerSecond() * deltaTime;
+      balanceEl.textContent = balance.toFixed(8) + " LTC";
+      document.getElementById('withdrawAvailable').textContent = balance.toFixed(8) + " LTC";
+
+      requestAnimationFrame(updateLoop);
+    }
+
+    // Modal Control Elements
+    const gamesModal = document.getElementById('gamesModal');
+    const playModal = document.getElementById('playModal');
+    const walletModal = document.getElementById('walletModal');
+
+    // Navigation Click Handlers
+    document.getElementById('tabMinigames').addEventListener('click', () => gamesModal.style.display = 'flex');
+    document.getElementById('boostBtn').addEventListener('click', () => gamesModal.style.display = 'flex');
+    document.getElementById('tabWallet').addEventListener('click', () => walletModal.style.display = 'flex');
+
+    document.getElementById('closeGames').addEventListener('click', () => gamesModal.style.display = 'none');
+    document.getElementById('closePlay').addEventListener('click', () => playModal.style.display = 'none');
+    document.getElementById('closeWallet').addEventListener('click', () => walletModal.style.display = 'none');
+
+    // Minigame Engine Logic
+    let tapsRequired = 10;
+    let currentReward = 50;
+
+    function startMinigame(title, rewardAmount, emoji) {
+      gamesModal.style.display = 'none';
+      playModal.style.display = 'flex';
+      tapsRequired = 10;
+      currentReward = rewardAmount;
+      document.getElementById('activeGameTitle').textContent = title;
+      document.getElementById('gameEmoji').textContent = emoji;
+      document.getElementById('tapCounter').textContent = `Taps Left: ${tapsRequired}`;
+    }
+
+    document.getElementById('startTapGame').addEventListener('click', () => startMinigame('⚡ Fast Tap Booster', 50, '⚡'));
+    document.getElementById('startCoinGame').addEventListener('click', () => startMinigame('⛏️ Coin Miner Challenge', 100, '⛏️'));
+
+    document.getElementById('gameTarget').addEventListener('click', () => {
+      if (tapsRequired > 0) {
+        tapsRequired--;
+        document.getElementById('tapCounter').textContent = `Taps Left: ${tapsRequired}`;
+        
+        if (tapsRequired === 0) {
+          gameBoostPower += currentReward;
+          updateStatsUI();
+          alert(`🎉 Challenge Complete! +${currentReward} GH/s Boost Power added.`);
+          playModal.style.display = 'none';
+        }
+      }
+    });
+
+    // Wallet Tabs Logic
+    const toggleDeposit = document.getElementById('toggleDeposit');
+    const toggleWithdraw = document.getElementById('toggleWithdraw');
+    const depositSection = document.getElementById('depositSection');
+    const withdrawSection = document.getElementById('withdrawSection');
+
+    toggleDeposit.addEventListener('click', () => {
+      toggleDeposit.classList.add('active');
+      toggleWithdraw.classList.remove('active');
+      depositSection.classList.add('active');
+      withdrawSection.classList.remove('active');
+    });
+
+    toggleWithdraw.addEventListener('click', () => {
+      toggleWithdraw.classList.add('active');
+      toggleDeposit.classList.remove('active');
+      withdrawSection.classList.add('active');
+      depositSection.classList.remove('active');
+    });
+
+    document.getElementById('copyAddressBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('ltcAddress').textContent);
+      alert('LTC Deposit Address copied to clipboard!');
+    });
+
+    document.getElementById('processWithdrawBtn').addEventListener('click', () => {
+      const addr = document.getElementById('withdrawAddrInput').value.trim();
+      const amount = parseFloat(document.getElementById('withdrawAmountInput').value);
+
+      if (!addr) return alert('Please enter a valid Litecoin destination address.');
+      if (isNaN(amount) || amount <= 0) return alert('Please enter a valid amount.');
+      if (amount < 0.001) return alert('Minimum withdrawal amount is 0.001 LTC.');
+      if (amount > balance) return alert('Insufficient balance.');
+
+      balance -= amount;
+      alert(`Withdrawal request of ${amount.toFixed(8)} LTC submitted successfully!`);
+      walletModal.style.display = 'none';
+    });
+
+    // Start App Loop
+    requestAnimationFrame(updateLoop);
+  </script>
+</body>
+  </html>
