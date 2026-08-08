@@ -632,7 +632,11 @@
       withdrawSection.classList.remove('active');
     });
 
-    https://www.effectivecpmnetwork.com/kzynkgeyg?key=41d03485c7b884a03f5ebba892b5d11e
+    toggleWithdraw.addEventListener('click', () => {
+      toggleWithdraw.classList.add('active');
+      toggleDeposit.classList.remove('active');
+      withdrawSection.classList.add('active');
+      depositSection.classList.remove('active');
     });
 
     document.getElementById('copyAddressBtn').addEventListener('click', () => {
